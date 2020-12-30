@@ -221,6 +221,15 @@ interface DatabaseClusterBaseProps {
    * @default - a new subnet group will be created.
    */
   readonly subnetGroup?: ISubnetGroup;
+
+  /**
+   * The target backtrack window, in seconds. To disable backtracking, set this value to 0.
+   *
+   * Values must be from 0 to 259200 seconds (72 hours).
+   *
+   * @default Duration.seconds(0)
+   */
+  readonly backtrackWindow?: Duration;
 }
 
 /**
@@ -353,6 +362,7 @@ abstract class DatabaseClusterNew extends DatabaseClusterBase {
       deletionProtection: defaultDeletionProtection(props.deletionProtection, props.removalPolicy),
       // Admin
       backupRetentionPeriod: props.backup?.retention?.toDays(),
+      backtrackWindow: props.backtrackWindow ? props.backtrackWindow.toSeconds(): Duration.seconds(0).toSeconds(),
       preferredBackupWindow: props.backup?.preferredWindow,
       preferredMaintenanceWindow: props.preferredMaintenanceWindow,
       databaseName: props.defaultDatabaseName,
