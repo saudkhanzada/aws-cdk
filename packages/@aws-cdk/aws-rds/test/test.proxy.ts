@@ -242,7 +242,7 @@ export = {
     const role = new Role(stack, 'DBProxyRole', {
       assumedBy: new AccountPrincipal(stack.account),
     });
-    proxy.grantConnect(role);
+    proxy.grantConnect(role, 'dbUser');
 
     // THEN
     expect(stack).to(haveResourceLike('AWS::IAM::Policy', {
@@ -251,9 +251,27 @@ export = {
           Effect: 'Allow',
           Action: 'rds-db:connect',
           Resource: {
-            'Fn::GetAtt': [
-              'ProxyCB0DFB71',
-              'DBProxyArn',
+            'Fn::Join': [
+              '',
+              [
+                'arn:',
+                {
+                  Ref: 'AWS::Partition',
+                },
+                ':rds-db:',
+                {
+                  Ref: 'AWS::Region',
+                },
+                ':',
+                {
+                  Ref: 'AWS::AccountId',
+                },
+                ':dbuser:',
+                {
+                  Ref: 'ProxyCB0DFB71',
+                },
+                '/dbUser',
+              ],
             ],
           },
         }],

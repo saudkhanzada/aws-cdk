@@ -319,7 +319,7 @@ export interface IDatabaseProxy extends cdk.IResource {
   /**
    * Grant the given identity connection access to the proxy.
    */
-  grantConnect(grantee: iam.IGrantable): iam.Grant;
+  grantConnect(grantee: iam.IGrantable, dbUser: string): iam.Grant;
 }
 
 /**
@@ -331,11 +331,17 @@ abstract class DatabaseProxyBase extends cdk.Resource implements IDatabaseProxy 
   public abstract readonly dbProxyArn: string;
   public abstract readonly endpoint: string;
 
-  public grantConnect(grantee: iam.IGrantable): iam.Grant {
+  public grantConnect(grantee: iam.IGrantable, dbUser: string): iam.Grant {
+    const arn = cdk.Arn.format({
+      service: 'rds-db',
+      resource: `dbuser:${this.dbProxyName}`,
+      resourceName: dbUser,
+    }, this.stack);
+
     return iam.Grant.addToPrincipal({
       grantee,
       actions: ['rds-db:connect'],
-      resourceArns: [this.dbProxyArn],
+      resourceArns: [arn],
     });
   }
 }
